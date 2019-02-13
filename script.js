@@ -1,5 +1,5 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiamFrZWMiLCJhIjoiY2pkNWF2ZnhqMmZscTJxcGE2amtwZnJ0aiJ9.5OojKRkdmcpPUPiFH1K0_Q';
-const host = ""
+const host = "149.28.176.220"
 const mapboxMap = {
         style: 'mapbox://styles/mapbox/streets-v9',
 }
