@@ -157,7 +157,6 @@ getAsync(`${host}/available-timestamps.json`, text => {
         const minsToNextImage = futureMinute - newMinute
         const newTimeout = minsToNextImage * mapSecondsPerMin * 1000
 
-        console.log("Next image:", availableImages[newActiveImage]);
         document.getElementById("timestamp").innerHTML = availableImages[newActiveImage];
         map.setPaintProperty(`tileset${activeImage}`, 'raster-opacity', 0);
         map.setPaintProperty(`tileset${newActiveImage}`, 'raster-opacity', maxOpacity);
