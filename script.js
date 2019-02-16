@@ -1,5 +1,6 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiamFrZWMiLCJhIjoiY2pkNWF2ZnhqMmZscTJxcGE2amtwZnJ0aiJ9.5OojKRkdmcpPUPiFH1K0_Q';
-const host = "149.28.176.220"
+
+const host = "https://tiles.cloudspotting.app"
 const mapboxMap = {
         style: 'mapbox://styles/mapbox/streets-v9',
 }
@@ -19,7 +20,7 @@ const mapboxMap = {
 
 let activeImage = 0
 
-getAsync("/available-timestamps.json", text => {
+getAsync(`${host}/available-timestamps.json`, text => {
     const availableImages = JSON.parse(text)
     availableImages.sort()
     const timestamp1 = availableImages[0]
@@ -31,7 +32,7 @@ getAsync("/available-timestamps.json", text => {
         .map(timestampStr => ({
             "type": "raster",
             "tiles": [
-                `${host}/tiles/${timestampStr}/{z}/{x}/{y}.png`
+                `${host}/${timestampStr}/{z}/{x}/{y}.png`
             ],
             "tileSize": 256,
             "scheme": "tms"
