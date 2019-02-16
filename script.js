@@ -6,19 +6,30 @@ const mapboxMap = {
 }
 
 
-// map.addControl(new mapboxgl.NavigationControl());
-
-// map.addControl(new MapboxDirections({
-//     accessToken: mapboxgl.accessToken
-// }), 'top-left');
-
-// map.addControl(geocoder, 'top-left');
-// map.addControl(new mapboxgl.FullscreenControl());
-
-// map.on('load', updateGeocoderProximity); // set proximity on map load
-// map.on('moveend', updateGeocoderProximity); // and then update proximity each time the map moves
-
 let activeImage = 0
+
+
+
+var request = new XMLHttpRequest();
+request.open('GET', 'http://api.ipstack.com/check?access_key=8a00459bf3aa78a9414775b03006c607', true);
+
+request.onload = function() {
+  if (request.status >= 200 && request.status < 400) {
+    // Success!
+    var data = JSON.parse(request.responseText);
+
+    console.log("IP data:", data)
+  } else {
+    // We reached our target server, but it returned an error
+  }
+};
+
+request.onerror = function() {
+  // There was a connection error of some sort
+};
+
+request.send();
+
 
 getAsync(`${host}/available-timestamps.json`, text => {
     const availableImages = JSON.parse(text)
@@ -92,15 +103,24 @@ getAsync(`${host}/available-timestamps.json`, text => {
         autocomplete: true
     });
 
+    const geolocate = new mapboxgl.GeolocateControl({
+        positionOptions: {
+            enableHighAccuracy: true
+        },
+        fitBoundsOptions: {
+            maxZoom: 10
+        }
+    })
+    map.addControl(geolocate);
+    map.addControl(new mapboxgl.FullscreenControl());
+
     map.on('load', function () {
-        map.addSource('dem', {
+        geolocate.trigger();
+
+         map.addSource('dem', {
             "type": "raster-dem",
             "url": "mapbox://mapbox.terrain-rgb"
         });
-    });
-
-    map.on('load', function () {
-        updateGeocoderProximity();
 
         // Insert the layer beneath any symbol layer.
         var layers = map.getStyle().layers;
@@ -114,13 +134,6 @@ getAsync(`${host}/available-timestamps.json`, text => {
         }
         printZoom()
     });
-
-
-	/*
-	todo
-set interval which is variable
-
-*/
 
 	function advanceImage() {
         var zoom = map.getZoom();
@@ -159,24 +172,6 @@ set interval which is variable
 		setTimeout(advanceImage, 300);
 	}
 
-    function updateGeocoderProximity() {
-        // proximity is designed for local scale, if the user is looking at the whole world,
-        // it doesn't make sense to factor in the arbitrary centre of the map
-        if (map.getZoom() > 9) {
-            var center = map.getCenter().wrap(); // ensures the longitude falls within -180 to 180 as the Geocoding API doesn't accept values outside this range
-            geocoder.setProximity({ longitude: center.lng, latitude: center.lat });
-        } else {
-            geocoder.setProximity(null);
-        }
-    }
-
-    // Add geolocate control to the map.
-    map.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
-    }));
 });
 
 const getCornerCoordinate = (initialPoint, dist, bearing) => {
