@@ -4706,9 +4706,10 @@ getAsync(host + "/available-timestamps.json", function (text) {
     }); }));
     var map = new mapboxgl.Map({
         container: 'map',
-        center: [151.2093, -33.8688],
-        zoom: 8,
-        style: 'mapbox://styles/mapbox/streets-v9'
+        center: [151.2027042, -33.8704156],
+        zoom: 5,
+        style: 'mapbox://styles/mapbox/streets-v9',
+        attributionControl: false
     });
     var geolocate = new mapboxgl.GeolocateControl({
         positionOptions: {
@@ -4720,6 +4721,9 @@ getAsync(host + "/available-timestamps.json", function (text) {
     });
     map.addControl(geolocate);
     map.addControl(new mapboxgl.FullscreenControl());
+    map.addControl(new mapboxgl.AttributionControl({
+        customAttribution: "© Bureau of Meteorology"
+    }));
     map.on('load', function () {
         document.getElementById("overlay").style.display = 'none';
         geolocate.trigger();
