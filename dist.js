@@ -1,4 +1,3 @@
-//import * as mapboxgl from 'mapbox-gl';
 var mapboxToken = 'pk.eyJ1IjoiamFrZWMiLCJhIjoiY2pkNWF2ZnhqMmZscTJxcGE2amtwZnJ0aiJ9.5OojKRkdmcpPUPiFH1K0_Q';
 Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(mapboxToken);
 var host = "https://tiles.cloudspotting.app";
@@ -71,6 +70,7 @@ getAsync(host + "/available-timestamps.json", function (text) {
     map.addControl(geolocate);
     map.addControl(new mapboxgl.FullscreenControl());
     map.on('load', function () {
+        document.getElementById("overlay").style.display = 'none';
         geolocate.trigger();
         printZoom();
         for (var key in sourcesDict) {
@@ -101,10 +101,9 @@ getAsync(host + "/available-timestamps.json", function (text) {
             : endLoopDelay;
         //console.log({newTimeout, newMinute, futureMinute, minsToNextImage});
         document.getElementById("timestamp").innerHTML = availableImages[newActiveImage];
+        // Using visibility -> none/visible results in new HTTP requests
         map.setPaintProperty("tileset" + activeImage, 'raster-opacity', 0);
         map.setPaintProperty("tileset" + newActiveImage, 'raster-opacity', maxOpacity);
-        // map.setLayoutProperty(`tileset${activeImage}`, 'visibility', 'none');
-        // map.setLayoutProperty(`tileset${newActiveImage}`, 'visibility', 'visible');
         activeImage = newActiveImage;
         setTimeout(advanceImage, newTimeout);
     }
