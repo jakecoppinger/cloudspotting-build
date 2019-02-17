@@ -1,5 +1,4 @@
 //import * as mapboxgl from 'mapbox-gl';
-console.log("Hello world");
 var mapboxToken = 'pk.eyJ1IjoiamFrZWMiLCJhIjoiY2pkNWF2ZnhqMmZscTJxcGE2amtwZnJ0aiJ9.5OojKRkdmcpPUPiFH1K0_Q';
 Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(mapboxToken);
 var host = "https://tiles.cloudspotting.app";
@@ -7,28 +6,32 @@ var mapboxMap = {
     style: 'mapbox://styles/mapbox/streets-v9',
 };
 var activeImage = 0;
+/*
 var request = new XMLHttpRequest();
 request.open('GET', 'http://api.ipstack.com/check?access_key=8a00459bf3aa78a9414775b03006c607', true);
-request.onload = function () {
-    if (request.status >= 200 && request.status < 400) {
-        // Success!
-        var data = JSON.parse(request.responseText);
-        console.log("IP data:", data);
-    }
-    else {
-        // We reached our target server, but it returned an error
-    }
+
+request.onload = function() {
+  if (request.status >= 200 && request.status < 400) {
+    // Success!
+    var data = JSON.parse(request.responseText);
+
+    console.log("IP data:", data)
+  } else {
+    // We reached our target server, but it returned an error
+  }
 };
-request.onerror = function () {
-    // There was a connection error of some sort
+
+request.onerror = function() {
+  // There was a connection error of some sort
 };
+
 request.send();
+*/
 getAsync(host + "/available-timestamps.json", function (text) {
     var availableImages = JSON.parse(text);
     availableImages.sort();
     var timestamp1 = availableImages[0];
     var timestamp2 = availableImages[1];
-    console.log({ timestamp1: timestamp1, timestamp2: timestamp2 });
     var numSets = availableImages.length;
     var sources = availableImages
         .map(function (timestampStr) { return ({
@@ -71,7 +74,6 @@ getAsync(host + "/available-timestamps.json", function (text) {
         geolocate.trigger();
         printZoom();
         for (var key in sourcesDict) {
-            console.log(key);
             map.addSource(key, sourcesDict[key]);
         }
         for (var layer in layers) {
@@ -80,9 +82,9 @@ getAsync(host + "/available-timestamps.json", function (text) {
     });
     function advanceImage() {
         var zoom = map.getZoom();
-        // console.log('Zoom:', zoom)
         var maxOpacity = 0.6;
         var newActiveImage = (activeImage + 1) % numSets;
+        var endLoopDelay = 2000;
         /*
         Realtime / Map
         if 30 mins is 6 seconds
@@ -94,10 +96,15 @@ getAsync(host + "/available-timestamps.json", function (text) {
         var newMinute = parseInt(availableImages[newActiveImage]);
         var futureMinute = parseInt(availableImages[(newActiveImage + 1) % numSets]);
         var minsToNextImage = futureMinute - newMinute;
-        var newTimeout = minsToNextImage * mapSecondsPerMin * 1000;
+        var newTimeout = futureMinute > newMinute
+            ? minsToNextImage * mapSecondsPerMin * 1000
+            : endLoopDelay;
+        //console.log({newTimeout, newMinute, futureMinute, minsToNextImage});
         document.getElementById("timestamp").innerHTML = availableImages[newActiveImage];
         map.setPaintProperty("tileset" + activeImage, 'raster-opacity', 0);
         map.setPaintProperty("tileset" + newActiveImage, 'raster-opacity', maxOpacity);
+        // map.setLayoutProperty(`tileset${activeImage}`, 'visibility', 'none');
+        // map.setLayoutProperty(`tileset${newActiveImage}`, 'visibility', 'visible');
         activeImage = newActiveImage;
         setTimeout(advanceImage, newTimeout);
     }
