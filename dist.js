@@ -5976,7 +5976,7 @@ getAsync(host + "/available-timestamps.json", function (text) {
         console.log({ newTimeout: newTimeout, newMinute: newMinute, futureMinute: futureMinute, minsToNextImage: minsToNextImage });
         var imageTime = timestamp_transforms_1.radarTimestampToTime(availableImages[newActiveImage]);
         var tz = moment.tz.guess();
-        var prettyTime = imageTime.tz(tz).format('MMMM Do, h:mm:ss a z');
+        var prettyTime = imageTime.tz(tz).format('h:mma z');
         console.log({ prettyTime: prettyTime });
         document.getElementById("timestamp").innerHTML = prettyTime;
         // Using visibility -> none/visible results in new HTTP requests
