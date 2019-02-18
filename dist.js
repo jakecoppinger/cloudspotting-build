@@ -5958,7 +5958,10 @@ getAsync(host + "/available-timestamps.json", function (text) {
         var zoom = map.getZoom();
         var maxOpacity = 0.6;
         var newActiveImage = (activeImage + 1) % numSets;
-        var endLoopDelay = 2000;
+        // Using visibility -> none/visible results in new HTTP requests
+        map.setPaintProperty("tileset" + activeImage, 'raster-opacity', 0);
+        map.setPaintProperty("tileset" + newActiveImage, 'raster-opacity', maxOpacity);
+        activeImage = newActiveImage;
         /*
         Realtime / Map
         if 30 mins is 6 seconds
@@ -5967,22 +5970,19 @@ getAsync(host + "/available-timestamps.json", function (text) {
         */
         var secondsPerLoop = 3;
         var mapSecondsPerMin = secondsPerLoop / 30;
-        var newMinute = parseInt(availableImages[newActiveImage]);
-        var futureMinute = parseInt(availableImages[(newActiveImage + 1) % numSets]);
-        var minsToNextImage = futureMinute - newMinute;
-        var newTimeout = futureMinute > newMinute
+        var endLoopDelay = 2000;
+        var currentMinute = timestamp_transforms_1.radarTimestampToTime(availableImages[activeImage]);
+        var nextMinute = timestamp_transforms_1.radarTimestampToTime(availableImages[(activeImage + 1) % numSets]);
+        var minsToNextImage = moment.duration(nextMinute.diff(currentMinute)).asMinutes();
+        var newTimeout = nextMinute > currentMinute
             ? minsToNextImage * mapSecondsPerMin * 1000
             : endLoopDelay;
-        console.log({ newTimeout: newTimeout, newMinute: newMinute, futureMinute: futureMinute, minsToNextImage: minsToNextImage });
-        var imageTime = timestamp_transforms_1.radarTimestampToTime(availableImages[newActiveImage]);
+        console.log({ newTimeout: newTimeout, newMinute: currentMinute, futureMinute: nextMinute, minsToNextImage: minsToNextImage });
+        var imageTime = timestamp_transforms_1.radarTimestampToTime(availableImages[activeImage]);
         var tz = moment.tz.guess();
         var prettyTime = imageTime.tz(tz).format('h:mma z');
         console.log({ prettyTime: prettyTime });
         document.getElementById("timestamp").innerHTML = prettyTime;
-        // Using visibility -> none/visible results in new HTTP requests
-        map.setPaintProperty("tileset" + activeImage, 'raster-opacity', 0);
-        map.setPaintProperty("tileset" + newActiveImage, 'raster-opacity', maxOpacity);
-        activeImage = newActiveImage;
         setTimeout(advanceImage, newTimeout);
     }
     function printZoom() {
