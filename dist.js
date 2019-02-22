@@ -5906,8 +5906,7 @@ var mapboxgl = require("mapbox-gl");
 var timestamp_transforms_1 = require("./timestamp-transforms");
 var mapboxToken = 'pk.eyJ1IjoiamFrZWMiLCJhIjoiY2pkNWF2ZnhqMmZscTJxcGE2amtwZnJ0aiJ9.5OojKRkdmcpPUPiFH1K0_Q';
 Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(mapboxToken);
-// TODO: Change tiles... domain to tiles1...
-var tileHosts = ["https://tiles2.cloudspotting.app", "https://tiles.cloudspotting.app"];
+var tileHosts = ["https://tiles2.cloudspotting.app", "https://tiles1.cloudspotting.app"];
 var mapboxMap = {
     style: 'mapbox://styles/mapbox/streets-v9',
 };
@@ -6019,13 +6018,10 @@ function getAsync(url) {
                                 resolve(this.responseText);
                             }
                             else {
+                                // TODO: Reject with an error
                                 reject();
                             }
                         }
-                        // if (this.readyState == 4 && this.status == 200) {
-                        //     resolve(this.responseText)
-                        // }
-                        // TODO: Reject somewhere
                     };
                     xhttp.open("GET", url, true);
                     xhttp.send();
