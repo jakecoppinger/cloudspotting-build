@@ -5906,7 +5906,8 @@ var mapboxgl = require("mapbox-gl");
 var timestamp_transforms_1 = require("./timestamp-transforms");
 var mapboxToken = 'pk.eyJ1IjoiamFrZWMiLCJhIjoiY2pkNWF2ZnhqMmZscTJxcGE2amtwZnJ0aiJ9.5OojKRkdmcpPUPiFH1K0_Q';
 Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(mapboxToken);
-var tileHost = "https://tiles.cloudspotting.app";
+// TODO: Change tiles... domain to tiles1...
+var tileHosts = ["https://tiles2.cloudspotting.app", "https://tiles.cloudspotting.app"];
 var mapboxMap = {
     style: 'mapbox://styles/mapbox/streets-v9',
 };
@@ -5915,7 +5916,6 @@ var activeImage = 0;
 function advanceImage(availableTimestamps, map) {
     console.log({ availableTimestamps: availableTimestamps });
     var numSets = availableTimestamps.length;
-    // var zoom = map.getZoom();
     var maxOpacity = 0.6;
     var newActiveImage = (activeImage + 1) % numSets;
     // Using visibility -> none/visible results in new HTTP requests
@@ -5958,7 +5958,7 @@ function createLayers(availableTimestamps) {
     }); });
     return layers;
 }
-function createSources(availableTimestamps) {
+function createSources(tileHost, availableTimestamps) {
     var sources = availableTimestamps
         .map(function (timestampStr) { return ({
         "type": "raster",
@@ -6014,9 +6014,17 @@ function getAsync(url) {
             return [2 /*return*/, new Promise(function (resolve, reject) {
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4 && this.status == 200) {
-                            resolve(this.responseText);
+                        if (this.readyState == 4) {
+                            if (this.status == 200) {
+                                resolve(this.responseText);
+                            }
+                            else {
+                                reject();
+                            }
                         }
+                        // if (this.readyState == 4 && this.status == 200) {
+                        //     resolve(this.responseText)
+                        // }
                         // TODO: Reject somewhere
                     };
                     xhttp.open("GET", url, true);
@@ -6027,37 +6035,65 @@ function getAsync(url) {
 }
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var mapPromise, timestampsJsonPromise, map, timestampsJson, availableImages, layers, sources, key, layer, delay;
+        var mapPromise, tileHost, currentTileHostIndex, tileHostError, timestampsJson, error_1, map, availableImages, layers, sources, key, layer, delay;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     mapPromise = loadMap();
-                    timestampsJsonPromise = getAsync(tileHost + "/available-timestamps.json");
-                    return [4 /*yield*/, mapPromise];
+                    currentTileHostIndex = 0;
+                    tileHostError = 1;
+                    _a.label = 1;
                 case 1:
-                    map = _a.sent();
-                    return [4 /*yield*/, timestampsJsonPromise];
+                    if (!(tileHostError == 1)) return [3 /*break*/, 6];
+                    _a.label = 2;
                 case 2:
+                    _a.trys.push([2, 4, , 5]);
+                    if (currentTileHostIndex >= tileHosts.length) {
+                        console.log("FALTAL: ALL TILE HOSTS DOWN!");
+                        tileHostError = -1; // fatal!
+                        // TODO: Clean up DOM manipulation - React yeah/nah?
+                        document.getElementById("timestamp").innerHTML = "Can't load radar :( Email me!";
+                        throw new Error();
+                    }
+                    tileHost = tileHosts[currentTileHostIndex];
+                    console.log("Trying host", tileHost);
+                    return [4 /*yield*/, getAsync(tileHost + "/available-timestamps.json")];
+                case 3:
                     timestampsJson = _a.sent();
+                    tileHostError = 0;
+                    return [3 /*break*/, 5];
+                case 4:
+                    error_1 = _a.sent();
+                    console.log("Error loading tilehost", tileHost);
+                    currentTileHostIndex += 1;
+                    return [3 /*break*/, 5];
+                case 5: return [3 /*break*/, 1];
+                case 6:
+                    if (tileHostError != -1) {
+                        console.log("Success with tilehost " + tileHost);
+                    }
+                    return [4 /*yield*/, mapPromise];
+                case 7:
+                    map = _a.sent();
                     availableImages = JSON.parse(timestampsJson);
                     availableImages.sort();
                     layers = createLayers(availableImages);
-                    sources = createSources(availableImages);
+                    sources = createSources(tileHost, availableImages);
                     for (key in sources) {
                         map.addSource(key, sources[key]);
                     }
                     for (layer in layers) {
                         map.addLayer(layers[layer]);
                     }
-                    _a.label = 3;
-                case 3:
-                    if (!true) return [3 /*break*/, 5];
+                    _a.label = 8;
+                case 8:
+                    if (!true) return [3 /*break*/, 10];
                     delay = advanceImage(availableImages, map);
                     return [4 /*yield*/, sleep(delay)];
-                case 4:
+                case 9:
                     _a.sent();
-                    return [3 /*break*/, 3];
-                case 5: return [2 /*return*/];
+                    return [3 /*break*/, 8];
+                case 10: return [2 /*return*/];
             }
         });
     });
