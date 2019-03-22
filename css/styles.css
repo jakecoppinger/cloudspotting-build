@@ -70,9 +70,10 @@ h1, h2, h3, p {
   }
 }
 #radar-progress-bar {
-  --scroll: 0%;
-  background: linear-gradient(to right, #3f51b5 var(--scroll), #00000021 0);
+  --scroll: 100%;
+  background: linear-gradient(to right, #0054e2 var(--scroll), #00000021 0);
   position: fixed;
   width: 100%;
-  height: 5px;
+  height: 10px;
+  mix-blend-mode: color-burn;
 }

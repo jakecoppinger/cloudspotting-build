@@ -5947,7 +5947,7 @@ function advanceImage(availableTimestamps, map) {
     var newTimeout = nextMinute > currentMinute
         ? minsToNextImage * mapSecondsPerMin * 1000
         : endLoopDelay;
-    console.log({ newTimeout: newTimeout, newMinute: currentMinute, futureMinute: nextMinute, minsToNextImage: minsToNextImage });
+    // console.log({newTimeout, newMinute: currentMinute, futureMinute: nextMinute, minsToNextImage});
     // TODO: is there a way of caching requests for images that haven't changes across timestamps?
     var imageTime = availableTimestamps[activeImage];
     var tz = moment.tz.guess();
