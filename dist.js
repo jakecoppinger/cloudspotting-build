@@ -5912,8 +5912,18 @@ var mapboxMap = {
 };
 // Global state - clean this up
 var activeImage = 0;
+function drawProgressBar(availableTimestamps, activeImage) {
+    var earliestTimestamp = availableTimestamps[0];
+    var latestTimestamp = availableTimestamps[availableTimestamps.length - 1];
+    var duration = moment.duration(latestTimestamp.diff(earliestTimestamp));
+    var totalMinutes = duration.asMinutes();
+    var activeTimestamp = availableTimestamps[activeImage];
+    var minutesProgress = moment.duration(activeTimestamp.diff(earliestTimestamp)).asMinutes();
+    var progressPercentage = (minutesProgress / totalMinutes) * 100;
+    var progressString = progressPercentage.toString() + "%";
+    document.getElementById("radar-progress-bar").style.setProperty("--scroll", progressString);
+}
 function advanceImage(availableTimestamps, map) {
-    console.log({ availableTimestamps: availableTimestamps });
     var numSets = availableTimestamps.length;
     var maxOpacity = 0.6;
     var newActiveImage = (activeImage + 1) % numSets;
@@ -5930,22 +5940,20 @@ function advanceImage(availableTimestamps, map) {
     var secondsPerLoop = 3;
     var mapSecondsPerMin = secondsPerLoop / 30;
     var endLoopDelay = 2000;
-    var currentMinute = timestamp_transforms_1.radarTimestampToTime(availableTimestamps[activeImage]);
-    var nextMinute = timestamp_transforms_1.radarTimestampToTime(availableTimestamps[(activeImage + 1) % numSets]);
+    var currentMinute = availableTimestamps[activeImage];
+    drawProgressBar(availableTimestamps, activeImage);
+    var nextMinute = availableTimestamps[(activeImage + 1) % numSets];
     var minsToNextImage = moment.duration(nextMinute.diff(currentMinute)).asMinutes();
     var newTimeout = nextMinute > currentMinute
         ? minsToNextImage * mapSecondsPerMin * 1000
         : endLoopDelay;
     console.log({ newTimeout: newTimeout, newMinute: currentMinute, futureMinute: nextMinute, minsToNextImage: minsToNextImage });
     // TODO: is there a way of caching requests for images that haven't changes across timestamps?
-    var imageTime = timestamp_transforms_1.radarTimestampToTime(availableTimestamps[activeImage]);
+    var imageTime = availableTimestamps[activeImage];
     var tz = moment.tz.guess();
     var prettyTime = imageTime.tz(tz).format('h:mma z');
     document.getElementById("timestamp").innerHTML = prettyTime;
     return newTimeout;
-}
-function printZoom() {
-    setTimeout(advanceImage, 300);
 }
 function createLayers(availableTimestamps) {
     var layers = availableTimestamps.map(function (timestampStr, index) { return ({
@@ -6031,7 +6039,7 @@ function getAsync(url) {
 }
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var mapPromise, tileHost, currentTileHostIndex, tileHostError, timestampsJson, error_1, map, availableImages, layers, sources, key, layer, delay;
+        var mapPromise, tileHost, currentTileHostIndex, tileHostError, timestampsJson, error_1, map, availableTimestrings, availableTimestamps, layers, sources, key, layer, delay;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -6071,10 +6079,11 @@ function main() {
                     return [4 /*yield*/, mapPromise];
                 case 7:
                     map = _a.sent();
-                    availableImages = JSON.parse(timestampsJson);
-                    availableImages.sort();
-                    layers = createLayers(availableImages);
-                    sources = createSources(tileHost, availableImages);
+                    availableTimestrings = JSON.parse(timestampsJson);
+                    availableTimestrings.sort();
+                    availableTimestamps = availableTimestrings.map(function (s) { return timestamp_transforms_1.radarTimestampToTime(s); });
+                    layers = createLayers(availableTimestrings);
+                    sources = createSources(tileHost, availableTimestrings);
                     for (key in sources) {
                         map.addSource(key, sources[key]);
                     }
@@ -6084,7 +6093,7 @@ function main() {
                     _a.label = 8;
                 case 8:
                     if (!true) return [3 /*break*/, 10];
-                    delay = advanceImage(availableImages, map);
+                    delay = advanceImage(availableTimestamps, map);
                     return [4 /*yield*/, sleep(delay)];
                 case 9:
                     _a.sent();
