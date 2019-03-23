@@ -5906,7 +5906,7 @@ var mapboxgl = require("mapbox-gl");
 var timestamp_transforms_1 = require("./timestamp-transforms");
 var mapboxToken = 'pk.eyJ1IjoiamFrZWMiLCJhIjoiY2pkNWF2ZnhqMmZscTJxcGE2amtwZnJ0aiJ9.5OojKRkdmcpPUPiFH1K0_Q';
 Object.getOwnPropertyDescriptor(mapboxgl, "accessToken").set(mapboxToken);
-var tileHosts = ["https://tiles2.cloudspotting.app", "https://tiles1.cloudspotting.app"];
+var tileHosts = ["https://tiles1.cloudspotting.app", "https://tiles2.cloudspotting.app"];
 var mapboxMap = {
     style: 'mapbox://styles/mapbox/streets-v9',
 };
