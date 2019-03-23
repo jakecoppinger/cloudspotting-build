@@ -35,6 +35,10 @@ h1, h2, h3, p {
   */
 }
 
+#version {
+  opacity: 0.5;
+}
+
 #menu h3 {
   display: inline;
   margin: 0px;
