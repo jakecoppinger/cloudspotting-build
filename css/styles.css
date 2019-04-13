@@ -19,20 +19,20 @@ h1, h2, h3, p {
   top: 0;
   bottom: 0;
   width: 100%;
-  background: #fff;
+  background: black;
+  opacity: 0.8;
 }
 
 #splashtext {
   position: absolute;
-  left: 50%;
+  left: 10%;
   top: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  text-align: center;
-  /*    margin-left: auto; 
-      margin-right: auto; 
-      width: 30em;
-  */
+  transform: translate(0%, -50%);
+  color: white;
+}
+#splashtext h1 {
+  line-height: 0.8;
+  font-size: 70px;
 }
 
 #version {
@@ -80,4 +80,8 @@ h1, h2, h3, p {
   width: 100%;
   height: 10px;
   mix-blend-mode: color-burn;
+}
+
+.mapboxgl-ctrl-top-right {
+  margin-top: 30px;
 }
