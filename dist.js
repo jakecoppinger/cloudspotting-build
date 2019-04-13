@@ -5983,6 +5983,26 @@ function createSources(tileHost, availableTimestamps) {
 }
 function loadMap() {
     return __awaiter(this, void 0, void 0, function () {
+        function positionInAustralia(coords) {
+            var latitude = coords.latitude, longitude = coords.longitude;
+            if (longitude > 156.226) {
+                // Off right of Aus
+                return false;
+            }
+            if (longitude < 109.60) {
+                // Off left of Aus
+                return false;
+            }
+            if (latitude > -7.667) {
+                // Off top of Australia
+                return false;
+            }
+            if (latitude < -44.903) {
+                // Of bottom
+                return false;
+            }
+            return true;
+        }
         var map, geolocate;
         return __generator(this, function (_a) {
             map = new mapboxgl.Map({
@@ -5998,6 +6018,14 @@ function loadMap() {
                 },
                 fitBoundsOptions: {
                     maxZoom: 9
+                }
+            });
+            geolocate.on('geolocate', function (data) {
+                var _a = data.coords, latitude = _a.latitude, longitude = _a.longitude;
+                console.log("Finished geolocation:");
+                console.log({ data: data });
+                if (!positionInAustralia(data.coords)) {
+                    alert("Sorry: Radar imagery only implemented for Australia.");
                 }
             });
             map.addControl(geolocate);
