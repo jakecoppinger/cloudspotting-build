@@ -5923,6 +5923,26 @@ function drawProgressBar(availableTimestamps, activeImage) {
     var progressString = progressPercentage.toString() + "%";
     document.getElementById("radar-progress-bar").style.setProperty("--scroll", progressString);
 }
+function positionInAustralia(coords) {
+    var latitude = coords.latitude, longitude = coords.longitude;
+    if (longitude > 156.226) {
+        // Off right of Aus
+        return false;
+    }
+    if (longitude < 109.60) {
+        // Off left of Aus
+        return false;
+    }
+    if (latitude > -7.667) {
+        // Off top of Australia
+        return false;
+    }
+    if (latitude < -44.903) {
+        // Of bottom
+        return false;
+    }
+    return true;
+}
 function advanceImage(availableTimestamps, map) {
     var numSets = availableTimestamps.length;
     var maxOpacity = 0.6;
@@ -5983,26 +6003,6 @@ function createSources(tileHost, availableTimestamps) {
 }
 function loadMap() {
     return __awaiter(this, void 0, void 0, function () {
-        function positionInAustralia(coords) {
-            var latitude = coords.latitude, longitude = coords.longitude;
-            if (longitude > 156.226) {
-                // Off right of Aus
-                return false;
-            }
-            if (longitude < 109.60) {
-                // Off left of Aus
-                return false;
-            }
-            if (latitude > -7.667) {
-                // Off top of Australia
-                return false;
-            }
-            if (latitude < -44.903) {
-                // Of bottom
-                return false;
-            }
-            return true;
-        }
         var map, geolocate;
         return __generator(this, function (_a) {
             map = new mapboxgl.Map({
@@ -6033,10 +6033,13 @@ function loadMap() {
             map.addControl(new mapboxgl.AttributionControl({
                 customAttribution: "© Bureau of Meteorology"
             }));
+            // disable map rotation using right click + drag
+            map.dragRotate.disable();
+            // disable map rotation using touch rotation gesture
+            map.touchZoomRotate.disableRotation();
             return [2 /*return*/, new Promise(function (resolve, reject) {
                     map.on('load', function () {
                         document.getElementById("overlay").style.display = 'none';
-                        geolocate.trigger();
                         resolve(map);
                     });
                 })];
