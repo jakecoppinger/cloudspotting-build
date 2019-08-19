@@ -5865,6 +5865,17 @@ moment.tz.load(require('./data/packed/latest.json'));
 
 },{}],6:[function(require,module,exports){
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -5910,6 +5921,7 @@ var tileHosts = ["https://tiles1.cloudspotting.app", "https://tiles2.cloudspotti
 var mapboxMap = {
     style: 'mapbox://styles/mapbox/streets-v9',
 };
+var proxy = function (url) { return "http://tiles1.cloudspotting.app:9090/" + url.replace('https://', 'https/'); };
 // Global state - clean this up
 var activeImage = 0;
 function drawProgressBar(availableTimestamps, activeImage) {
@@ -5978,7 +5990,8 @@ function advanceImage(availableTimestamps, map) {
 function createLayers(availableTimestamps) {
     var layers = availableTimestamps.map(function (timestampStr, index) { return ({
         "id": "tileset" + index,
-        "type": "raster",
+        'type': 'raster',
+        // "type": mapboxgl.Lay
         "source": "tileset" + index,
         "minzoom": 1,
         "maxzoom": 22,
@@ -6003,15 +6016,36 @@ function createSources(tileHost, availableTimestamps) {
 }
 function loadMap() {
     return __awaiter(this, void 0, void 0, function () {
-        var map, geolocate;
+        var sources, layers, openStreetMap, map, geolocate;
         return __generator(this, function (_a) {
-            map = new mapboxgl.Map({
-                container: 'map',
-                center: [151.2027042, -33.8704156],
-                zoom: 5,
-                style: 'mapbox://styles/mapbox/streets-v9',
-                attributionControl: false
-            });
+            sources = {
+                "osm": {
+                    "type": "raster",
+                    "tiles": [
+                        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png ",
+                        proxy("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png "),
+                        proxy("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png "),
+                        proxy("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png "),
+                        proxy("https://a.tile.openstreetmap.org/{z}/{x}/{y}.png "),
+                    ],
+                    "tileSize": 256
+                },
+            };
+            layers = [{
+                    "id": "osm",
+                    "type": "raster",
+                    "source": "osm",
+                    "minzoom": 0,
+                    "maxzoom": 22
+                }];
+            openStreetMap = {
+                style: {
+                    "version": 8,
+                    "sources": sources,
+                    "layers": layers
+                }
+            };
+            map = new mapboxgl.Map(__assign({ container: 'map', center: [151.2027042, -33.8704156], zoom: 5 }, openStreetMap, { attributionControl: false }));
             geolocate = new mapboxgl.GeolocateControl({
                 positionOptions: {
                     enableHighAccuracy: true
